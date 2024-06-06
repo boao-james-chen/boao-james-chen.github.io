@@ -336,6 +336,7 @@ filtered_bibtex_keywords:
     abbr,
     abstract,
     additional_info,
+    author
     altmetric,
     arxiv,
     award,
