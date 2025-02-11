@@ -14,10 +14,10 @@ profile:
 news: false  # includes a list of news items
 latest_posts: false  # includes a list of the newest posts
 selected_papers: false # includes a list of papers marked as "selected={true}"
-social: true  # includes social icons at the bottom of the page
+social: true  # includes social icons at the bhttps://www.brandeis.edu/computer-science/index.htmlottom of the page
 ---
 
 👋 
 
-Hi there! I am a first year PhD student at the Michtom School of Computer Science, Brandeis University, working under the mentorship of Prof.[Subhadeep Sarkar](https://subhadeep.net/). My research interest are broadly leveraging machine learning to solve large-scale data management challenges. Prior to joining Brandeis, I completed my M.Eng and undergraduate studies in Computer science from Cornell University where I'm fortunate to be working with Prof. [Sainyam Galhotra](https://sainyamgalhotra.com/) and Prof. [Cheng Zhang](https://czhang.org/).  
+Hi there! I am a PhD student at the Michtom School of Computer Science, [Brandeis University](https://www.brandeis.edu/computer-science/), working under the mentorship of Prof.[Subhadeep Sarkar](https://subhadeep.net/). My research interest are broadly in tuning and optimizing large scale data systems, with a current focus on Log-Structured Merge (LSM) trees. Prior to joining Brandeis, I completed my undergraduate studies in Computer Science from [Cornell University](https://www.cs.cornell.edu/). 
 
