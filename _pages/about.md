@@ -1,8 +1,8 @@
 ---
 layout: about
-title: about
+title: About
 permalink: /
-subtitle: short bio
+subtitle: Ph.D. Researcher
 
 
 profile:
