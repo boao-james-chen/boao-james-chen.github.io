@@ -1,0 +1,490 @@
+<!-- _includes/lsm_visualizer.liquid -->
+<div class="lsm-container mt-4 mb-4">
+  <div class="lsm-header">
+    <div class="lsm-title">
+      <i class="fa-solid fa-microchip"></i> LSM-Tree Buffer & Compaction Simulator
+    </div>
+  </div>
+
+  <div class="canvas-wrapper">
+    <canvas id="lsmCanvas"></canvas>
+  </div>
+
+  <div class="lsm-controls">
+    <button id="lsmWriteBtn" class="btn btn-sm btn-outline-theme">
+      <i class="fa-solid fa-plus"></i> Write Key-Value
+    </button>
+    <button id="lsmCompactBtn" class="btn btn-sm btn-outline-theme" disabled>
+      <i class="fa-solid fa-compress"></i> Compact L0 → L1
+    </button>
+    <button id="lsmClearBtn" class="btn btn-sm btn-outline-secondary">
+      <i class="fa-solid fa-rotate-left"></i> Reset
+    </button>
+  </div>
+</div>
+
+<style>
+  .lsm-container {
+    background: var(--global-bg-color);
+    border: 1px solid var(--global-divider-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+  }
+
+  [data-theme="dark"] .lsm-container {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: rgba(30, 30, 30, 0.6);
+  }
+
+  .lsm-header {
+    margin-bottom: 1.2rem;
+  }
+
+  .lsm-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--global-theme-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .lsm-subtitle {
+    font-size: 0.8rem;
+    color: var(--global-text-color-light);
+    margin-top: 0.2rem;
+  }
+
+  .canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px dashed var(--global-divider-color);
+    overflow: hidden;
+  }
+
+  [data-theme="dark"] .canvas-wrapper {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  #lsmCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lsm-controls {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-outline-theme {
+    color: var(--global-theme-color) !important;
+    border: 1px solid var(--global-theme-color) !important;
+    background-color: transparent !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-theme:hover:not(:disabled) {
+    background-color: var(--global-theme-color) !important;
+    color: var(--global-bg-color) !important;
+    box-shadow: 0 4px 12px rgba(var(--global-theme-color), 0.2);
+  }
+
+  .btn-outline-theme:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('lsmCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const writeBtn = document.getElementById('lsmWriteBtn');
+    const compactBtn = document.getElementById('lsmCompactBtn');
+    const clearBtn = document.getElementById('lsmClearBtn');
+
+    // State parameters
+    let dpr = window.devicePixelRatio || 1;
+    let width = 0;
+    let height = 0;
+
+    let memtable = []; // max 8 entries
+    let level0 = []; // max 3 runs, each run is an array of entries
+    let level1 = []; // sorted list of entries (max 16)
+    let particles = [];
+    let animations = [];
+
+    const MAX_MEM_CAP = 8;
+    const MAX_L0_RUNS = 3;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Track Theme Colors dynamically
+    function getThemeColors() {
+      const style = getComputedStyle(document.documentElement);
+      return {
+        theme: style.getPropertyValue('--global-theme-color').trim() || '#9c27b0',
+        text: style.getPropertyValue('--global-text-color').trim() || '#333333',
+        textLight: style.getPropertyValue('--global-text-color-light').trim() || '#777777',
+        divider: style.getPropertyValue('--global-divider-color').trim() || '#dddddd',
+        bg: style.getPropertyValue('--global-bg-color').trim() || '#ffffff',
+      };
+    }
+
+    class Particle {
+      constructor(sx, sy, tx, ty, val, callback) {
+        this.x = sx;
+        this.y = sy;
+        this.tx = tx;
+        this.ty = ty;
+        this.val = val;
+        this.speed = 0.08;
+        this.progress = 0;
+        this.callback = callback;
+      }
+      update() {
+        this.progress += this.speed;
+        if (this.progress >= 1) {
+          this.progress = 1;
+          if (this.callback) this.callback();
+          return false; // delete
+        }
+        return true;
+      }
+      draw(colors) {
+        const cx = this.x + (this.tx - this.x) * this.progress;
+        const cy = this.y + (this.ty - this.y) * this.progress;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = colors.theme;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = colors.theme;
+        ctx.fill();
+        ctx.shadowBlur = 0; // reset
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 8px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.val, cx, cy);
+      }
+    }
+
+    class SlideAnimation {
+      constructor(items, sy, ty, speed, callback) {
+        this.items = items;
+        this.y = sy;
+        this.ty = ty;
+        this.progress = 0;
+        this.speed = speed;
+        this.callback = callback;
+      }
+      update() {
+        this.progress += this.speed;
+        if (this.progress >= 1) {
+          this.progress = 1;
+          if (this.callback) this.callback();
+          return false;
+        }
+        return true;
+      }
+      getCurrentY() {
+        return this.y + (this.ty - this.y) * this.progress;
+      }
+    }
+
+    function addKey() {
+      if (animations.length > 0) return; // wait for animations
+      if (memtable.length >= MAX_MEM_CAP) return;
+
+      const randomVal = Math.floor(Math.random() * 99) + 1;
+      
+      // Calculate target position in MemTable UI based on sorted insertion index
+      let temp = [...memtable, randomVal];
+      temp.sort((a, b) => a - b);
+      const targetIndex = temp.indexOf(randomVal);
+
+      const colors = getThemeColors();
+      const memX = width * 0.15;
+      const memY = 50;
+      const memW = width * 0.7;
+      const cellW = memW / MAX_MEM_CAP;
+      const targetX = memX + targetIndex * cellW + cellW/2;
+      const targetY = memY + 15;
+
+      writeBtn.disabled = true;
+      particles.push(new Particle(width / 2, height + 10, targetX, targetY, randomVal, () => {
+        memtable.push(randomVal);
+        memtable.sort((a, b) => a - b); // Keep MemTable sorted per LSM-tree theory
+        writeBtn.disabled = false;
+
+        // Auto flush if full
+        if (memtable.length === MAX_MEM_CAP) {
+          triggerFlush();
+        }
+      }));
+    }
+
+    function triggerFlush() {
+      writeBtn.disabled = true;
+      const colors = getThemeColors();
+      
+      const startY = 50;
+      const targetY = 120 + level0.length * 28;
+
+      animations.push(new SlideAnimation([...memtable], startY, targetY, 0.04, () => {
+        level0.push([...memtable]);
+        memtable = [];
+        writeBtn.disabled = false;
+        if (level0.length === MAX_L0_RUNS) {
+          compactBtn.disabled = false;
+        }
+      }));
+    }
+
+    function triggerCompaction() {
+      if (level0.length < MAX_L0_RUNS) return;
+      compactBtn.disabled = true;
+      writeBtn.disabled = true;
+
+      // Merge sort level0 runs into level1
+      let merged = [];
+      level0.forEach(run => merged.push(...run));
+      merged.sort((a, b) => a - b);
+      // Limit size of Level 1 for UI representation
+      if (merged.length > 16) {
+        merged = merged.slice(0, 16);
+      }
+
+      const startY = 120;
+      const targetY = 205;
+
+      animations.push(new SlideAnimation(merged, startY, targetY, 0.03, () => {
+        level1 = merged;
+        level0 = [];
+        writeBtn.disabled = false;
+      }));
+    }
+
+    function reset() {
+      memtable = [];
+      level0 = [];
+      level1 = [];
+      particles = [];
+      animations = [];
+      writeBtn.disabled = false;
+      compactBtn.disabled = true;
+    }
+
+    // Event listeners
+    writeBtn.addEventListener('click', addKey);
+    compactBtn.addEventListener('click', triggerCompaction);
+    clearBtn.addEventListener('click', reset);
+
+    // Loop
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      const colors = getThemeColors();
+
+      // Draw Grid / Blocks
+      // 1. MemTable Box
+      const memX = width * 0.15;
+      const memY = 50;
+      const memW = width * 0.7;
+      const memH = 30;
+      ctx.strokeStyle = colors.divider;
+      ctx.lineWidth = 1;
+      ctx.fillStyle = colors.divider + '22';
+      ctx.beginPath();
+      ctx.roundRect(memX, memY, memW, memH, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Label MemTable
+      ctx.fillStyle = colors.text;
+      ctx.font = '600 11px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('MemTable (In-Memory)', memX, memY - 8);
+
+      // MemTable cells
+      const cellW = memW / MAX_MEM_CAP;
+      for (let i = 0; i < MAX_MEM_CAP; i++) {
+        const cx = memX + i * cellW;
+        ctx.strokeStyle = colors.divider;
+        ctx.beginPath();
+        ctx.moveTo(cx, memY);
+        ctx.lineTo(cx, memY + memH);
+        ctx.stroke();
+
+        let isSlotOccupied = false;
+        let valueToDraw = null;
+
+        if (particles.length > 0 && animations.length === 0) {
+          const activeParticle = particles[0];
+          let temp = [...memtable];
+          temp.push(activeParticle.val);
+          temp.sort((a, b) => a - b);
+          const pIndex = temp.indexOf(activeParticle.val);
+
+          if (i === pIndex) {
+            // Target slot for particle, keep empty
+            continue;
+          } else if (i > pIndex) {
+            // Draw element i-1
+            if (i - 1 < memtable.length) {
+              isSlotOccupied = true;
+              valueToDraw = memtable[i - 1];
+            }
+          } else {
+            // Draw element i
+            if (i < memtable.length) {
+              isSlotOccupied = true;
+              valueToDraw = memtable[i];
+            }
+          }
+        } else {
+          if (i < memtable.length && animations.length === 0) {
+            isSlotOccupied = true;
+            valueToDraw = memtable[i];
+          }
+        }
+
+        if (isSlotOccupied) {
+          ctx.fillStyle = colors.theme + 'dd';
+          ctx.beginPath();
+          ctx.roundRect(cx + 3, memY + 3, cellW - 6, memH - 6, 3);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(valueToDraw, cx + cellW/2, memY + memH/2 + 3);
+        }
+      }
+
+      // 2. Level 0 Box
+      const l0X = memX;
+      const l0Y = 110;
+      const l0W = memW;
+      const l0H = 88;
+      ctx.strokeStyle = colors.divider;
+      ctx.fillStyle = colors.divider + '11';
+      ctx.beginPath();
+      ctx.roundRect(l0X, l0Y, l0W, l0H, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = colors.text;
+      ctx.fillText('Level 0', l0X, l0Y - 8);
+
+      // Draw L0 runs
+      for (let r = 0; r < MAX_L0_RUNS; r++) {
+        const ry = l0Y + 8 + r * 26;
+        ctx.strokeStyle = colors.divider;
+        ctx.setLineDash([2, 2]);
+        ctx.strokeRect(l0X + 5, ry, l0W - 10, 20);
+        ctx.setLineDash([]);
+
+        if (r < level0.length) {
+          const run = level0[r];
+          const runCellW = (l0W - 10) / MAX_MEM_CAP;
+          for (let i = 0; i < run.length; i++) {
+            ctx.fillStyle = colors.theme + '99';
+            ctx.beginPath();
+            ctx.roundRect(l0X + 5 + i * runCellW + 2, ry + 2, runCellW - 4, 16, 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '9px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(run[i], l0X + 5 + i * runCellW + runCellW/2, ry + 12);
+          }
+        }
+      }
+
+      // 3. Level 1 Box
+      const l1X = memX;
+      const l1Y = 225;
+      const l1W = memW;
+      const l1H = 30;
+      ctx.strokeStyle = colors.divider;
+      ctx.fillStyle = colors.divider + '11';
+      ctx.beginPath();
+      ctx.roundRect(l1X, l1Y, l1W, l1H, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = colors.text;
+      ctx.fillText('Level 1', l1X, l1Y - 8);
+
+      // Draw Level 1 entries
+      if (level1.length > 0) {
+        const l1CellW = l1W / level1.length;
+        for (let i = 0; i < level1.length; i++) {
+          const cx = l1X + i * l1CellW;
+          ctx.fillStyle = colors.theme;
+          ctx.beginPath();
+          ctx.roundRect(cx + 2, l1Y + 3, l1CellW - 4, l1H - 6, 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(level1[i], cx + l1CellW/2, l1Y + l1H/2 + 3);
+        }
+      }
+
+      // Update & Draw Particles
+      particles = particles.filter(p => {
+        const active = p.update();
+        p.draw(colors);
+        return active;
+      });
+
+      // Update & Draw Animations
+      animations = animations.filter(ani => {
+        const active = ani.update();
+        const currentY = ani.getCurrentY();
+        const runW = memW / ani.items.length;
+
+        for (let i = 0; i < ani.items.length; i++) {
+          const cx = memX + i * runW;
+          ctx.fillStyle = colors.theme + 'cc';
+          ctx.beginPath();
+          ctx.roundRect(cx + 3, currentY + 3, runW - 6, 20, 3);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(ani.items[i], cx + runW/2, currentY + 15);
+        }
+        return active;
+      });
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  });
+</script>

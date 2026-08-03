@@ -3,7 +3,7 @@
 
 
 @Article{trial1,
-  AUTHOR = {Ke Li, Ruidong Zhang, Siyuan Chen, Boao Chen, Mose Sakashita, François Guimbretière, Cheng Zhang},
+  AUTHOR = {Ke Li and Ruidong Zhang and Siyuan Chen and Boao Chen and Mose Sakashita and François Guimbretière and Cheng Zhang},
   TITLE = {EyeEcho: Continuous and Low-power Facial Expression Tracking on Glasses},
   Conference = {CHI},
   YEAR = {2024},
@@ -12,7 +12,7 @@
 }
 
 @Article{trial2,
-  AUTHOR = {Ke Li, Ruidong Zhang, Boao Chen, Siyuan Chen, Sicheng Yin, Saif Mahmud, Qikang Liang, François Guimbretière, Cheng Zhang},
+  AUTHOR = {Ke Li and Ruidong Zhang and Boao Chen and Siyuan Chen and Sicheng Yin and Saif Mahmud and Qikang Liang and François Guimbretière and Cheng Zhang},
   TITLE = {GazeTrak: Exploring Acoustic-based Eye Tracking on a Glass Frame},
   Conference = {MobiCom},
   YEAR = {2024},
@@ -22,7 +22,7 @@
 }
 
 @Article{trial3,
-  AUTHOR = {Ke Li, Devansh Agarwal, Ruidong Zhang, Vipin Gunda, Tianjun Mo, Saif Mahmud, Boao Chen, François Guimbretière, Cheng Zhang},
+  AUTHOR = {Ke Li and Devansh Agarwal and Ruidong Zhang and Vipin Gunda and Tianjun Mo and Saif Mahmud and Boao Chen and François Guimbretière and Cheng Zhang},
   TITLE = {SonicID: User Identification on Smart Glasses with Acoustic Sensing},
   Conference = {IMWUT},
   YEAR = {2024},
@@ -32,11 +32,19 @@
 }
 
 @Article{trial4,
-  AUTHOR = {Alexander H. Ott, Shubham Kaushik, Boao Chen, Subhadeep Sarkar},
+  AUTHOR = {Alexander H. Ott and Shubham Kaushik and Boao Chen and Subhadeep Sarkar},
   TITLE = {Tectonic: Bridging Synthetic and Real-World Workloads for Key-Value Benchmarking},
   Conference = {TPCTC},
   YEAR = {2025},
   html = {https://doi.org/10.1007/978-3-032-18070-4_5},
 
   abstract={Key-value stores are the backbone of many modern SQL- and NoSQL-based data systems, serving a variety of real-world applications. Despite their widespread adoption, existing key-value benchmarks fall short across multiple dimensions when accurately replicating complex and dynamic real-world workloads. For instance, state-of-the-art key-value benchmarks, such as YCSB, KVBench, and db_bench, are unable to (i) emulate dynamic workloads where the workload composition and distribution changes arbitrarily over time; (ii) generate composite keys with different prefix distributions; and (iii) generate workloads with varied degrees of data sortedness. These limitations result in inaccurate performance evaluations and limit the ability to understand how a commercial key-value store performs under dynamically shifting workloads. In this paper, we introduce Tectonic, a highly configurable and resource-efficient Rust-based key-value workload generator designed to model the temporal, structural, and dynamic properties of real-world workloads. Tectonic offers (i) fine-grained control over data access patterns for inserts, updates, merges, point and range queries, and point and range deletes; (ii) configurable composite key generation/selection strategies; (iii) dynamic workload generation where the workload properties change over time; and (iv) generation of workloads with user-specified data sortedness. Tectonic does so (v) at a 2x higher throughput than the state-of-the-art, (vi) while recording up to 84% lower main memory footprint. By bridging the gap between synthetic and production workloads, Tectonic enables in-depth analysis of key-value data systems under conditions that better reflect the demands of real-world applications. We benchmark Tectonic's performance against YCSB and KVBench in terms of latency, resource utilization, and ability to emulate production workloads. The code for Tectonic is available at: https://github.com/SSD-Brandeis/tectonic.}
+}
+
+@Article{mindthebuffer2026,
+  AUTHOR = {Boao Chen and Shubham Kaushik and Subhadeep Sarkar},
+  TITLE = {Mind the Buffer: Dissecting the LSM-Buffer Design Space},
+  YEAR = {2026},
+  abbr = {in review},
+  abstract={Log-structured merge (LSM)-trees are widely used as the storage layer data structure in modern NoSQL key-value stores due to their superior ingestion throughput, competitive query performance, and efficient space utilization. To enable fast ingestion, LSM-based storage engines first batch the incoming data in an in-memory buffer and then, opportunistically write the data to slower secondary storage as a collection of immutable sorted runs. We point out that while the data is largely storage-resident, the overall performance of an LSM-based storage engine is critically bottlenecked by the (i) implementation, (ii) tuning, and (iii) size of the in-memory buffer. In fact, even with the same buffer configuration, the performance of an LSM-engine may vary by several orders of magnitude if there is a shift in workload. Choosing the appropriate buffer design, thus, is crucial for performance, but, at the same time, hard, as the LSM-buffer design space is vast and largely unexplored. In this paper, we evaluate and analyze the performance of LSM-engines with nine different buffer implementations – including three hash-hybrid designs – while varying the tuning and size for each implementation to understand their implications on performance and the tradeoffs associated. For each configuration, we further vary the workload composition and distribution, the LSM-tuning, and the underlying hardware to quantify their impact on performance. To the best of our knowledge, this is the first comprehensive analysis of LSM-buffer design space. Finally, for the practitioners, we present a handbook with 10 key guidelines for choosing the appropriate buffer design and tuning for a given workload and performance target.}
 }

@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "/opt/homebrew/opt/ruby@3.3/bin/bundle exec jekyll serve",
+    "dev": "/opt/homebrew/opt/ruby@3.3/bin/bundle exec jekyll serve"
+  },
   "devDependencies": {
     "@shopify/prettier-plugin-liquid": "1.4.0",
     "prettier": "3.1.1"

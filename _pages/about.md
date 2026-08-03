@@ -12,8 +12,9 @@ profile:
   address: 
 
 news: true  # includes a list of news items
-latest_posts: false  # includes a list of the newest posts
+publications: true  # includes a list of all publications
 selected_papers: false # includes a list of papers marked as "selected={true}"
+lsm_visualizer: true  # includes interactive LSM-tree visualizer at the bottom of the page
 social: true  # includes social icons at the bottom of the page
 ---
 
