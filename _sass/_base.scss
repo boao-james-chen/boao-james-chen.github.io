@@ -367,15 +367,26 @@ ul.task-list input[type="checkbox"] {
   }
 }
 
-// Social (bottom)
+.post {
+  article {
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
 
 .social {
-  text-align: center;
+  text-align: left;
+  margin-top: 0.25rem;
+  margin-bottom: 1.25rem;
 
   .contact-icons {
-    font-size: 4rem;
+    font-size: 1.35rem;
+    line-height: 1;
 
     a {
+      margin-right: 0.6rem;
+
       i::before {
         color: var(--global-text-color);
         transition-property: all 0.2s ease-in-out;
@@ -391,6 +402,8 @@ ul.task-list input[type="checkbox"] {
 
   .contact-note {
     font-size: 0.8rem;
+    margin-top: 0.25rem;
+    color: var(--global-text-color-light);
   }
 }
 
