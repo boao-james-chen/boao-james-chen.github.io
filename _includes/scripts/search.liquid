@@ -37,39 +37,32 @@
           window.location.href = "{{ '/' | relative_url }}";
         },
       },
-      {%- assign sorted_pages = site.pages | sort: "nav_order" -%}
+      {%- assign sorted_pages = site.pages | sort: "title" -%}
       {%- for p in sorted_pages -%}
-        {%- if p.nav and p.autogen == null -%}
-          {%- if p.dropdown -%}
-            {%- for child in p.children -%}
-              {%- unless child.title == 'divider' -%}
-                {
-                  {%- assign title = child.title | escape -%}
-                  {%- if child.permalink contains "/blog/" -%}{%- assign url = "/blog/" -%} {%- else -%}{%- assign url = child.url -%}{%- endif -%}
-                  id: "dropdown-{{ title | slugify }}",
-                  title: "{{ title }}",
-                  description: "{{ child.description | strip_html | strip_newlines | escape }}",
-                  section: "Dropdown",
-                  handler: () => {
-                    window.location.href = "{{ url | relative_url }}";
-                  },
-                },
-              {%- endunless -%}
-            {%- endfor -%}
-
-          {%- else -%}
+        {%- if p.autogen == null and p.title -%}
+          {%- unless p.permalink == '/' or p.title == '404' or p.title == 'About' -%}
             {
               {%- assign title = p.title | escape -%}
-              {%- if p.permalink contains "/blog/" -%}{%- assign url = "/blog/" -%} {%- else -%}{%- assign url = p.url -%}{%- endif -%}
-              id: "nav-{{ title | slugify }}",
+              {%- if p.redirect -%}
+                {%- if p.redirect contains '://' -%}
+                  {%- assign url = p.redirect -%}
+                {%- else -%}
+                  {%- assign url = p.redirect | relative_url -%}
+                {%- endif -%}
+              {%- elsif p.permalink contains "/blog/" -%}
+                {%- assign url = "/blog/" | relative_url -%}
+              {%- else -%}
+                {%- assign url = p.url | relative_url -%}
+              {%- endif -%}
+              id: "page-{{ title | slugify }}",
               title: "{{ title }}",
               description: "{{ p.description | strip_html | strip_newlines | escape }}",
-              section: "Navigation",
+              section: "Pages",
               handler: () => {
-                window.location.href = "{{ url | relative_url }}";
+                window.location.href = "{{ url }}";
               },
             },
-          {%- endif -%}
+          {%- endunless -%}
         {%- endif -%}
       {%- endfor -%}
       {%- for post in site.posts -%}

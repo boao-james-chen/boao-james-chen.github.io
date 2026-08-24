@@ -14,7 +14,7 @@ profile:
 news: true  # includes a list of news items
 publications: true  # includes a list of all publications
 selected_papers: false # includes a list of papers marked as "selected={true}"
-lsm_visualizer: true  # includes interactive LSM-tree visualizer at the bottom of the page
+lsm_visualizer: false  # moved to /misc/ page
 social: true  # includes social icons at the bottom of the page
 ---
 
