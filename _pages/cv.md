@@ -5,6 +5,7 @@ title: CV
 nav: true
 nav_order: 5
 cv_pdf: MY_CV.pdf
+redirect: assets/pdf/MY_CV.pdf
 description: 
 toc:
   sidebar: left

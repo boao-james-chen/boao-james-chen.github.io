@@ -128,5 +128,11 @@
 
   .publications {
     margin-top: 0;
+
+    h2.bibliography:first-of-type {
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0.5rem;
+    }
   }
 }

@@ -3,11 +3,15 @@
 <div class="row">
   {% if site.enable_publication_thumbnails %}
     <div class="col col-sm-2 abbr">
-      {%- if entry.abbr -%}
-        {%- if site.data.venues[entry.abbr] -%}
+      {% assign abbr_text = entry.abbr %}
+      {% unless abbr_text %}
+        {% assign abbr_text = entry.conference %}
+      {% endunless %}
+      {%- if abbr_text -%}
+        {%- if site.data.venues[abbr_text] -%}
           {% assign venue_style = null %}
-          {% if site.data.venues[entry.abbr].color != blank %}
-            {% assign venue_style = site.data.venues[entry.abbr].color | prepend: 'style="background-color:' | append: '"' %}
+          {% if site.data.venues[abbr_text].color != blank %}
+            {% assign venue_style = site.data.venues[abbr_text].color | prepend: 'style="background-color:' | append: '"' %}
           {%- endif -%}
           <abbr
             class="badge rounded w-100"
@@ -15,17 +19,32 @@
               {{ venue_style }}
             {% endif -%}
           >
-            {% if site.data.venues[entry.abbr].url %}
-              <a href="{{site.data.venues[entry.abbr].url}}">{{ entry.abbr }}</a>
+            {% if site.data.venues[abbr_text].url %}
+              <a href="{{site.data.venues[abbr_text].url}}">{{ abbr_text }}</a>
             {% else %}
-              <div>{{- entry.abbr -}}</div>
+              <div>{{- abbr_text -}}</div>
             {% endif %}
           </abbr>
         {% else %}
-          <abbr class="badge rounded w-100">{{ entry.abbr }}</abbr>
+          <abbr class="badge rounded w-100">{{ abbr_text }}</abbr>
         {% endif %}
       {% endif %}
       {% if entry.preview %}
+        {% assign pdf_target = entry.pdf %}
+        {% unless pdf_target %}
+          {% assign pdf_target = entry.html %}
+        {% endunless %}
+        {% unless pdf_target %}
+          {% assign pdf_target = entry.arxiv %}
+        {% endunless %}
+        {% if pdf_target %}
+          {% if pdf_target contains '://' %}
+            {% assign pdf_url = pdf_target %}
+          {% else %}
+            {% assign pdf_url = pdf_target | prepend: '/assets/pdf/' | relative_url %}
+          {% endif %}
+          <a href="{{ pdf_url }}" target="_blank" rel="noopener noreferrer">
+        {% endif %}
         {% if entry.preview contains '://' %}
           <img class="preview z-depth-1 rounded" src="{{ entry.preview }}">
         {% else %}
@@ -36,9 +55,12 @@
             path=entry_path
             sizes = "200px"
             class="preview z-depth-1 rounded"
-            zoomable=true
+            zoomable=false
             alt=entry.preview
           %}
+        {% endif %}
+        {% if pdf_target %}
+          </a>
         {% endif %}
       {% endif %}
     </div>
@@ -47,7 +69,25 @@
   <!-- Entry bib key -->
   <div id="{{entry.key}}" class="{% if site.enable_publication_thumbnails %}col-sm-8{% else %}col-sm-10{% endif %}">
     <!-- Title -->
-    <div class="title">{{ entry.title }}</div>
+    <div class="title">
+      {% if entry.pdf %}
+        {% if entry.pdf contains '://' %}
+          <a href="{{ entry.pdf }}" target="_blank" rel="noopener noreferrer">{{ entry.title }}</a>
+        {% else %}
+          <a href="{{ entry.pdf | prepend: '/assets/pdf/' | relative_url }}" target="_blank" rel="noopener noreferrer">{{ entry.title }}</a>
+        {% endif %}
+      {% elsif entry.html %}
+        {% if entry.html contains '://' %}
+          <a href="{{ entry.html }}" target="_blank" rel="noopener noreferrer">{{ entry.title }}</a>
+        {% else %}
+          <a href="{{ entry.html | prepend: '/assets/html/' | relative_url }}" target="_blank" rel="noopener noreferrer">{{ entry.title }}</a>
+        {% endif %}
+      {% elsif entry.arxiv %}
+        <a href="http://arxiv.org/abs/{{ entry.arxiv }}" target="_blank" rel="noopener noreferrer">{{ entry.title }}</a>
+      {% else %}
+        {{ entry.title }}
+      {% endif %}
+    </div>
     <!-- Author -->
     <div class="author">
       {% assign author_array_size = entry.author_array | size %}

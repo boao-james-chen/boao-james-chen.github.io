@@ -20,6 +20,13 @@ group :jekyll_plugins do
     gem 'mini_racer'
     gem 'unicode_utils'
     gem 'webrick'
+    gem 'logger'
+    gem 'observer'
+    gem 'csv'
+    gem 'base64'
+    gem 'ostruct'
+    gem 'mutex_m'
+    gem 'benchmark'
 end
 group :other_plugins do
     gem 'css_parser'
