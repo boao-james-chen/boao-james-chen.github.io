@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://boao-james-chen.github.io/sitemap.xml
+Sitemap: https://boaochen.com/sitemap.xml
