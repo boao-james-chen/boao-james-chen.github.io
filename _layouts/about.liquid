@@ -8,7 +8,7 @@ layout: default
       <!-- Live Status Pill -->
       <div class="hero-status-pill">
         <span class="status-pulse"></span>
-        <span class="status-text">PhD Researcher &bull; Storage Engines &amp; LSM-Trees</span>
+        <span class="status-text">PhD Researcher &bull; Intelligent Data Systems &amp; Storage Engines</span>
       </div>
 
       <h1 class="hero-name">
@@ -28,6 +28,7 @@ layout: default
 
       <!-- Research Focus Chips -->
       <div class="hero-focus-chips">
+        <span class="focus-chip"><i class="fa-solid fa-brain"></i> Intelligent Data Systems</span>
         <span class="focus-chip"><i class="fa-solid fa-bolt"></i> LSM-Trees</span>
         <span class="focus-chip"><i class="fa-solid fa-database"></i> Storage Engines</span>
         <span class="focus-chip"><i class="fa-solid fa-memory"></i> Buffer Tuning</span>
@@ -80,17 +81,6 @@ layout: default
           </div>
         {% endif %}
       </div>
-
-      <!-- Inspirational Research Quote Banner -->
-      <div class="hero-quote-card">
-        <div class="quote-badge">
-          <i class="fa-solid fa-lightbulb"></i>
-          <span>Research Philosophy</span>
-        </div>
-        <p class="quote-text">
-          &ldquo;Dissecting the trade-offs of LSM storage engines &mdash; bridging theoretical data structures with real-world system throughput from write buffers to disk compactions.&rdquo;
-        </p>
-      </div>
     </div>
 
     {% if page.profile and page.profile.image %}
@@ -119,7 +109,7 @@ layout: default
     <section class="section homepage-pillars" aria-labelledby="pillars-heading">
       <div class="section-header">
         <h2 id="pillars-heading">Research Focus</h2>
-        <span class="section-tagline">Storage Engines &bull; Systems Benchmarking &bull; Ubiquitous Computing</span>
+        <span class="section-tagline">Storage Engines &bull; Systems Benchmarking &bull; Intelligent Data Systems</span>
       </div>
       <div class="pillars-grid">
         <div class="pillar-card">
@@ -161,32 +151,21 @@ layout: default
         <div class="pillar-card">
           <div class="pillar-top">
             <div class="pillar-icon">
-              <i class="fa-solid fa-wave-square"></i>
+              <i class="fa-solid fa-brain"></i>
             </div>
-            <span class="pillar-venue-tag">CHI / MobiCom</span>
+            <span class="pillar-venue-tag">Self-Tuning</span>
           </div>
-          <h3 class="pillar-title">Acoustic Ubicomp Sensing</h3>
+          <h3 class="pillar-title">Intelligent Data Systems</h3>
           <p class="pillar-desc">
-            Continuous low-power facial expression tracking (EyeEcho), eye gaze tracking (GazeTrak), and biometric user authentication (SonicID) on smart glasses.
+            Designing workload-aware self-tuning storage engines and adaptive memory hierarchies that autonomously optimize caching, buffer sizing, and compaction tradeoffs.
           </p>
           <div class="pillar-chips">
-            <span>Acoustic AI</span>
-            <span>Smart Glasses</span>
-            <span>Low-Power Edge</span>
+            <span>Adaptive Systems</span>
+            <span>Workload-Aware</span>
+            <span>Self-Designing</span>
           </div>
         </div>
       </div>
-    </section>
-  {% endif %}
-
-  <!-- LSM Visualizer (Interactive Demo) -->
-  {% if page.lsm_visualizer %}
-    <section class="section homepage-lsm-visualizer" aria-labelledby="simulator-heading">
-      <div class="section-header">
-        <h2 id="simulator-heading">Interactive Research Lab</h2>
-        <span class="section-tagline">Live LSM-Tree Buffer &amp; Compaction Simulation</span>
-      </div>
-      {% include lsm_visualizer.liquid %}
     </section>
   {% endif %}
 
