@@ -1,8 +1,36 @@
 <!-- _includes/lsm_visualizer.liquid -->
-<div class="lsm-container mt-4 mb-4">
+<div class="lsm-container">
+  <div class="lsm-top-bar">
+    <div class="lsm-badge-pill">
+      <span class="lsm-live-dot"></span>
+      <span>Live Simulation</span>
+    </div>
+    <div class="lsm-metric-chips">
+      <div class="metric-chip">
+        <span class="metric-label">MemTable</span>
+        <span class="metric-val" id="statMem">0 / 8</span>
+      </div>
+      <div class="metric-chip">
+        <span class="metric-label">L0 Runs</span>
+        <span class="metric-val" id="statL0">0 / 3</span>
+      </div>
+      <div class="metric-chip">
+        <span class="metric-label">L1 Keys</span>
+        <span class="metric-val" id="statL1">0 keys</span>
+      </div>
+      <div class="metric-chip highlight">
+        <span class="metric-label">Compactions</span>
+        <span class="metric-val" id="statComp">0</span>
+      </div>
+    </div>
+  </div>
+
   <div class="lsm-header">
     <div class="lsm-title">
-      <i class="fa-solid fa-microchip"></i> LSM-Tree Buffer & Compaction Simulator
+      <i class="fa-solid fa-microchip"></i> LSM-Tree Buffer &amp; Compaction Simulator
+    </div>
+    <div class="lsm-subtitle">
+      Visualizing in-memory write buffering (SkipList) and asynchronous tiered merge-compaction from Level 0 to Level 1.
     </div>
   </div>
 
@@ -11,65 +39,164 @@
   </div>
 
   <div class="lsm-controls">
-    <button id="lsmWriteBtn" class="btn btn-sm btn-outline-theme">
-      <i class="fa-solid fa-plus"></i> Write Key-Value
+    <button id="lsmAutoBtn" class="btn btn-sm btn-lsm-primary" type="button">
+      <i class="fa-solid fa-play"></i> <span>Auto Demo</span>
     </button>
-    <button id="lsmCompactBtn" class="btn btn-sm btn-outline-theme" disabled>
-      <i class="fa-solid fa-compress"></i> Compact L0 → L1
+    <button id="lsmWriteBtn" class="btn btn-sm btn-lsm-outline" type="button">
+      <i class="fa-solid fa-plus"></i> <span>Write Key-Value</span>
     </button>
-    <button id="lsmClearBtn" class="btn btn-sm btn-outline-secondary">
-      <i class="fa-solid fa-rotate-left"></i> Reset
+    <button id="lsmCompactBtn" class="btn btn-sm btn-lsm-outline" type="button" disabled>
+      <i class="fa-solid fa-compress"></i> <span>Compact L0 &rarr; L1</span>
     </button>
+    <button id="lsmClearBtn" class="btn btn-sm btn-lsm-ghost" type="button">
+      <i class="fa-solid fa-rotate-left"></i> <span>Reset</span>
+    </button>
+  </div>
+
+  <div class="lsm-legend">
+    <div class="legend-item">
+      <span class="legend-dot dot-mem"></span>
+      <strong>MemTable (RAM):</strong> In-memory sorted write buffer
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot dot-l0"></span>
+      <strong>Level 0 (SSD):</strong> Multiple unsorted flushed runs
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot dot-l1"></span>
+      <strong>Level 1 (SSD):</strong> Compacted sorted non-overlapping runs
+    </div>
   </div>
 </div>
 
 <style>
   .lsm-container {
-    background: var(--global-bg-color);
+    background: var(--global-card-bg-color, var(--global-bg-color));
     border: 1px solid var(--global-divider-color);
     border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(8px);
+    padding: 1.35rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.25s ease;
+    margin-top: 0.5rem;
   }
 
   [data-theme="dark"] .lsm-container {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    background: rgba(30, 30, 30, 0.6);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   }
 
-  .lsm-header {
-    margin-bottom: 1.2rem;
+  .lsm-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--global-divider-color);
   }
 
-  .lsm-title {
-    font-size: 1.1rem;
+  .lsm-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--global-theme-color);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .lsm-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: lsm-pulse 1.8s infinite;
+  }
+
+  @keyframes lsm-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+
+  .lsm-metric-chips {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .metric-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    background: var(--global-code-bg-color);
+    font-size: 0.73rem;
+    border: 1px solid var(--global-divider-color);
+  }
+
+  .metric-chip .metric-label {
+    color: var(--global-text-color-light);
+    font-weight: 500;
+  }
+
+  .metric-chip .metric-val {
+    color: var(--global-text-color);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric-chip.highlight {
+    border-color: rgba(var(--global-theme-color), 0.3);
+    background: rgba(var(--global-theme-color), 0.08);
+  }
+
+  .metric-chip.highlight .metric-val {
+    color: var(--global-theme-color);
+  }
+
+  .lsm-header {
+    margin-bottom: 1rem;
+  }
+
+  .lsm-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--global-text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .lsm-title i {
+    color: var(--global-theme-color);
+    font-size: 1rem;
   }
 
   .lsm-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.825rem;
     color: var(--global-text-color-light);
-    margin-top: 0.2rem;
+    margin-top: 0.25rem;
+    line-height: 1.45;
   }
 
   .canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 280px;
+    height: 285px;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px dashed var(--global-divider-color);
+    background: var(--global-code-bg-color);
+    border: 1px solid var(--global-divider-color);
     overflow: hidden;
-  }
-
-  [data-theme="dark"] .canvas-wrapper {
-    background: rgba(0, 0, 0, 0.2);
   }
 
   #lsmCanvas {
@@ -80,28 +207,136 @@
 
   .lsm-controls {
     display: flex;
-    gap: 0.8rem;
-    margin-top: 1.2rem;
+    gap: 0.6rem;
+    margin-top: 1rem;
     flex-wrap: wrap;
+    align-items: center;
   }
 
-  .btn-outline-theme {
-    color: var(--global-theme-color) !important;
+  @media (max-width: 540px) {
+    .lsm-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .lsm-controls .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .btn-lsm-primary {
+    background: var(--global-theme-color) !important;
+    color: #ffffff !important;
     border: 1px solid var(--global-theme-color) !important;
-    background-color: transparent !important;
+    font-weight: 600;
+    border-radius: 6px;
+    height: 2.1rem;
+    padding: 0 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  .btn-lsm-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  }
+
+  .btn-lsm-primary.is-running {
+    background: #e11d48 !important;
+    border-color: #e11d48 !important;
+  }
+
+  .btn-lsm-outline {
+    background: transparent !important;
+    color: var(--global-text-color) !important;
+    border: 1px solid var(--global-divider-color) !important;
     font-weight: 500;
-    transition: all 0.2s ease;
+    border-radius: 6px;
+    height: 2.1rem;
+    padding: 0 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
   }
 
-  .btn-outline-theme:hover:not(:disabled) {
-    background-color: var(--global-theme-color) !important;
-    color: var(--global-bg-color) !important;
-    box-shadow: 0 4px 12px rgba(var(--global-theme-color), 0.2);
+  .btn-lsm-outline:hover:not(:disabled) {
+    border-color: var(--global-theme-color) !important;
+    color: var(--global-theme-color) !important;
+    background: rgba(var(--global-theme-color), 0.08) !important;
+    transform: translateY(-1px);
   }
 
-  .btn-outline-theme:disabled {
-    opacity: 0.4;
+  .btn-lsm-outline:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
+  }
+
+  .btn-lsm-ghost {
+    background: transparent !important;
+    color: var(--global-text-color-light) !important;
+    border: 1px solid transparent !important;
+    font-weight: 500;
+    border-radius: 6px;
+    height: 2.1rem;
+    padding: 0 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+
+  .btn-lsm-ghost:hover {
+    color: var(--global-text-color) !important;
+    background: var(--global-divider-color) !important;
+  }
+
+  .lsm-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 0.65rem 1rem;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--global-divider-color);
+    font-size: 0.75rem;
+    color: var(--global-text-color-light);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1.4;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .dot-mem {
+    background: var(--global-theme-color);
+  }
+
+  .dot-l0 {
+    background: #eab308;
+  }
+
+  .dot-l1 {
+    background: #0284c7;
   }
 </style>
 
@@ -114,42 +349,64 @@
     const writeBtn = document.getElementById('lsmWriteBtn');
     const compactBtn = document.getElementById('lsmCompactBtn');
     const clearBtn = document.getElementById('lsmClearBtn');
+    const autoBtn = document.getElementById('lsmAutoBtn');
+
+    const statMem = document.getElementById('statMem');
+    const statL0 = document.getElementById('statL0');
+    const statL1 = document.getElementById('statL1');
+    const statComp = document.getElementById('statComp');
 
     // State parameters
-    let dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio || 1;
     let width = 0;
     let height = 0;
 
     let memtable = []; // max 8 entries
-    let level0 = []; // max 3 runs, each run is an array of entries
-    let level1 = []; // sorted list of entries (max 16)
+    let level0 = [];   // max 3 runs, each run is an array of entries
+    let level1 = [];   // sorted list of entries (max 16)
     let particles = [];
     let animations = [];
+    let compactionsCount = 0;
 
     const MAX_MEM_CAP = 8;
     const MAX_L0_RUNS = 3;
+
+    let isAutoRunning = false;
+    let autoTimer = null;
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      if (ctx.resetTransform) {
+        ctx.resetTransform();
+      } else {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
       ctx.scale(dpr, dpr);
     }
     resize();
     window.addEventListener('resize', resize);
 
-    // Track Theme Colors dynamically
     function getThemeColors() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const style = getComputedStyle(document.documentElement);
-      return {
-        theme: style.getPropertyValue('--global-theme-color').trim() || '#9c27b0',
-        text: style.getPropertyValue('--global-text-color').trim() || '#333333',
-        textLight: style.getPropertyValue('--global-text-color-light').trim() || '#777777',
-        divider: style.getPropertyValue('--global-divider-color').trim() || '#dddddd',
-        bg: style.getPropertyValue('--global-bg-color').trim() || '#ffffff',
-      };
+      const theme = style.getPropertyValue('--global-theme-color').trim() || '#9c27b0';
+      const text = style.getPropertyValue('--global-text-color').trim() || (isDark ? '#f0f0f0' : '#222222');
+      const textLight = style.getPropertyValue('--global-text-color-light').trim() || (isDark ? '#a0a0a0' : '#666666');
+      const containerBg = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)';
+      const containerBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
+      const slotBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+      return { isDark, theme, text, textLight, containerBg, containerBorder, slotBorder };
+    }
+
+    function updateStats() {
+      if (statMem) statMem.textContent = `${memtable.length} / ${MAX_MEM_CAP}`;
+      if (statL0) statL0.textContent = `${level0.length} / ${MAX_L0_RUNS}`;
+      if (statL1) statL1.textContent = `${level1.length} keys`;
+      if (statComp) statComp.textContent = `${compactionsCount}`;
     }
 
     class Particle {
@@ -159,7 +416,7 @@
         this.tx = tx;
         this.ty = ty;
         this.val = val;
-        this.speed = 0.08;
+        this.speed = 0.085;
         this.progress = 0;
         this.callback = callback;
       }
@@ -168,7 +425,7 @@
         if (this.progress >= 1) {
           this.progress = 1;
           if (this.callback) this.callback();
-          return false; // delete
+          return false;
         }
         return true;
       }
@@ -176,13 +433,13 @@
         const cx = this.x + (this.tx - this.x) * this.progress;
         const cy = this.y + (this.ty - this.y) * this.progress;
         ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fillStyle = colors.theme;
         ctx.shadowBlur = 10;
         ctx.shadowColor = colors.theme;
         ctx.fill();
-        ctx.shadowBlur = 0; // reset
-        
+        ctx.shadowBlur = 0;
+
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 8px sans-serif';
         ctx.textAlign = 'center';
@@ -215,50 +472,52 @@
     }
 
     function addKey() {
-      if (animations.length > 0) return; // wait for animations
-      if (memtable.length >= MAX_MEM_CAP) return;
+      if (animations.length > 0) return false;
+      if (memtable.length >= MAX_MEM_CAP) return false;
 
-      const randomVal = Math.floor(Math.random() * 99) + 1;
-      
-      // Calculate target position in MemTable UI based on sorted insertion index
+      const randomVal = Math.floor(Math.random() * 90) + 10;
+
       let temp = [...memtable, randomVal];
       temp.sort((a, b) => a - b);
       const targetIndex = temp.indexOf(randomVal);
 
-      const colors = getThemeColors();
-      const memX = width * 0.15;
-      const memY = 50;
-      const memW = width * 0.7;
+      const memX = width * 0.12;
+      const memY = 48;
+      const memW = width * 0.76;
       const cellW = memW / MAX_MEM_CAP;
-      const targetX = memX + targetIndex * cellW + cellW/2;
-      const targetY = memY + 15;
+      const targetX = memX + targetIndex * cellW + cellW / 2;
+      const targetY = memY + 14;
 
       writeBtn.disabled = true;
       particles.push(new Particle(width / 2, height + 10, targetX, targetY, randomVal, () => {
         memtable.push(randomVal);
-        memtable.sort((a, b) => a - b); // Keep MemTable sorted per LSM-tree theory
-        writeBtn.disabled = false;
+        memtable.sort((a, b) => a - b);
+        updateStats();
 
-        // Auto flush if full
         if (memtable.length === MAX_MEM_CAP) {
           triggerFlush();
+        } else {
+          writeBtn.disabled = false;
         }
       }));
+      return true;
     }
 
     function triggerFlush() {
       writeBtn.disabled = true;
-      const colors = getThemeColors();
-      
-      const startY = 50;
-      const targetY = 120 + level0.length * 28;
+      const startY = 48;
+      const targetY = 112 + level0.length * 26;
 
-      animations.push(new SlideAnimation([...memtable], startY, targetY, 0.04, () => {
+      animations.push(new SlideAnimation([...memtable], startY, targetY, 0.05, () => {
         level0.push([...memtable]);
         memtable = [];
-        writeBtn.disabled = false;
+        updateStats();
+
         if (level0.length === MAX_L0_RUNS) {
           compactBtn.disabled = false;
+          writeBtn.disabled = true;
+        } else {
+          writeBtn.disabled = false;
         }
       }));
     }
@@ -268,21 +527,21 @@
       compactBtn.disabled = true;
       writeBtn.disabled = true;
 
-      // Merge sort level0 runs into level1
       let merged = [];
       level0.forEach(run => merged.push(...run));
       merged.sort((a, b) => a - b);
-      // Limit size of Level 1 for UI representation
       if (merged.length > 16) {
         merged = merged.slice(0, 16);
       }
 
-      const startY = 120;
-      const targetY = 205;
+      const startY = 112;
+      const targetY = 222;
 
-      animations.push(new SlideAnimation(merged, startY, targetY, 0.03, () => {
+      animations.push(new SlideAnimation(merged, startY, targetY, 0.035, () => {
         level1 = merged;
         level0 = [];
+        compactionsCount++;
+        updateStats();
         writeBtn.disabled = false;
       }));
     }
@@ -295,113 +554,187 @@
       animations = [];
       writeBtn.disabled = false;
       compactBtn.disabled = true;
+      updateStats();
     }
 
-    // Event listeners
-    writeBtn.addEventListener('click', addKey);
-    compactBtn.addEventListener('click', triggerCompaction);
-    clearBtn.addEventListener('click', reset);
+    function toggleAuto() {
+      if (isAutoRunning) {
+        stopAuto();
+      } else {
+        startAuto();
+      }
+    }
 
-    // Loop
+    function startAuto() {
+      isAutoRunning = true;
+      if (autoBtn) {
+        autoBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Pause Demo</span>';
+        autoBtn.classList.add('is-running');
+      }
+      runAutoStep();
+    }
+
+    function stopAuto() {
+      isAutoRunning = false;
+      if (autoTimer) {
+        clearTimeout(autoTimer);
+        autoTimer = null;
+      }
+      if (autoBtn) {
+        autoBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Auto Demo</span>';
+        autoBtn.classList.remove('is-running');
+      }
+    }
+
+    function runAutoStep() {
+      if (!isAutoRunning) return;
+
+      if (animations.length > 0 || particles.length > 0) {
+        autoTimer = setTimeout(runAutoStep, 260);
+        return;
+      }
+
+      if (level0.length >= MAX_L0_RUNS) {
+        triggerCompaction();
+        autoTimer = setTimeout(runAutoStep, 1300);
+        return;
+      }
+
+      if (level1.length >= 16 && level0.length === 0 && memtable.length === 0) {
+        autoTimer = setTimeout(() => {
+          if (!isAutoRunning) return;
+          reset();
+          autoTimer = setTimeout(runAutoStep, 700);
+        }, 2200);
+        return;
+      }
+
+      addKey();
+      autoTimer = setTimeout(runAutoStep, 450);
+    }
+
+    // Attach click handlers
+    writeBtn.addEventListener('click', () => {
+      stopAuto();
+      addKey();
+    });
+    compactBtn.addEventListener('click', () => {
+      stopAuto();
+      triggerCompaction();
+    });
+    clearBtn.addEventListener('click', () => {
+      stopAuto();
+      reset();
+    });
+    if (autoBtn) {
+      autoBtn.addEventListener('click', toggleAuto);
+    }
+
+    // Render loop
     function draw() {
       ctx.clearRect(0, 0, width, height);
       const colors = getThemeColors();
 
-      // Draw Grid / Blocks
-      // 1. MemTable Box
-      const memX = width * 0.15;
-      const memY = 50;
-      const memW = width * 0.7;
-      const memH = 30;
-      ctx.strokeStyle = colors.divider;
+      const memX = width * 0.12;
+      const memY = 44;
+      const memW = width * 0.76;
+      const memH = 28;
+
+      // 1. MemTable Container
+      ctx.strokeStyle = colors.containerBorder;
       ctx.lineWidth = 1;
-      ctx.fillStyle = colors.divider + '22';
+      ctx.fillStyle = colors.containerBg;
       ctx.beginPath();
-      ctx.roundRect(memX, memY, memW, memH, 4);
+      if (ctx.roundRect) {
+        ctx.roundRect(memX, memY, memW, memH, 4);
+      } else {
+        ctx.rect(memX, memY, memW, memH);
+      }
       ctx.fill();
       ctx.stroke();
 
-      // Label MemTable
       ctx.fillStyle = colors.text;
-      ctx.font = '600 11px sans-serif';
+      ctx.font = '600 11px system-ui, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('MemTable (In-Memory)', memX, memY - 8);
+      ctx.fillText('MemTable (DRAM Write Buffer)', memX, memY - 7);
 
-      // MemTable cells
       const cellW = memW / MAX_MEM_CAP;
       for (let i = 0; i < MAX_MEM_CAP; i++) {
         const cx = memX + i * cellW;
-        ctx.strokeStyle = colors.divider;
+        ctx.strokeStyle = colors.slotBorder;
         ctx.beginPath();
         ctx.moveTo(cx, memY);
         ctx.lineTo(cx, memY + memH);
         ctx.stroke();
 
-        let isSlotOccupied = false;
+        let isOccupied = false;
         let valueToDraw = null;
 
         if (particles.length > 0 && animations.length === 0) {
           const activeParticle = particles[0];
-          let temp = [...memtable];
-          temp.push(activeParticle.val);
+          let temp = [...memtable, activeParticle.val];
           temp.sort((a, b) => a - b);
           const pIndex = temp.indexOf(activeParticle.val);
 
           if (i === pIndex) {
-            // Target slot for particle, keep empty
             continue;
           } else if (i > pIndex) {
-            // Draw element i-1
             if (i - 1 < memtable.length) {
-              isSlotOccupied = true;
+              isOccupied = true;
               valueToDraw = memtable[i - 1];
             }
           } else {
-            // Draw element i
             if (i < memtable.length) {
-              isSlotOccupied = true;
+              isOccupied = true;
               valueToDraw = memtable[i];
             }
           }
         } else {
           if (i < memtable.length && animations.length === 0) {
-            isSlotOccupied = true;
+            isOccupied = true;
             valueToDraw = memtable[i];
           }
         }
 
-        if (isSlotOccupied) {
-          ctx.fillStyle = colors.theme + 'dd';
+        if (isOccupied) {
+          ctx.fillStyle = colors.theme;
           ctx.beginPath();
-          ctx.roundRect(cx + 3, memY + 3, cellW - 6, memH - 6, 3);
+          if (ctx.roundRect) {
+            ctx.roundRect(cx + 2, memY + 2, cellW - 4, memH - 4, 3);
+          } else {
+            ctx.rect(cx + 2, memY + 2, cellW - 4, memH - 4);
+          }
           ctx.fill();
 
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 10px sans-serif';
+          ctx.font = 'bold 10px monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(valueToDraw, cx + cellW/2, memY + memH/2 + 3);
+          ctx.fillText(valueToDraw, cx + cellW / 2, memY + memH / 2 + 3.5);
         }
       }
 
-      // 2. Level 0 Box
+      // 2. Level 0 Container (Disk)
       const l0X = memX;
-      const l0Y = 110;
+      const l0Y = 104;
       const l0W = memW;
       const l0H = 88;
-      ctx.strokeStyle = colors.divider;
-      ctx.fillStyle = colors.divider + '11';
+      ctx.strokeStyle = colors.containerBorder;
+      ctx.fillStyle = colors.containerBg;
       ctx.beginPath();
-      ctx.roundRect(l0X, l0Y, l0W, l0H, 6);
+      if (ctx.roundRect) {
+        ctx.roundRect(l0X, l0Y, l0W, l0H, 6);
+      } else {
+        ctx.rect(l0X, l0Y, l0W, l0H);
+      }
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = colors.text;
-      ctx.fillText('Level 0', l0X, l0Y - 8);
+      ctx.fillText('Level 0 (Disk SSTable Runs)', l0X, l0Y - 7);
 
-      // Draw L0 runs
       for (let r = 0; r < MAX_L0_RUNS; r++) {
         const ry = l0Y + 8 + r * 26;
-        ctx.strokeStyle = colors.divider;
+        ctx.strokeStyle = colors.slotBorder;
         ctx.setLineDash([2, 2]);
         ctx.strokeRect(l0X + 5, ry, l0W - 10, 20);
         ctx.setLineDash([]);
@@ -410,59 +743,70 @@
           const run = level0[r];
           const runCellW = (l0W - 10) / MAX_MEM_CAP;
           for (let i = 0; i < run.length; i++) {
-            ctx.fillStyle = colors.theme + '99';
+            ctx.fillStyle = '#d97706';
             ctx.beginPath();
-            ctx.roundRect(l0X + 5 + i * runCellW + 2, ry + 2, runCellW - 4, 16, 2);
+            if (ctx.roundRect) {
+              ctx.roundRect(l0X + 5 + i * runCellW + 2, ry + 2, runCellW - 4, 16, 2);
+            } else {
+              ctx.rect(l0X + 5 + i * runCellW + 2, ry + 2, runCellW - 4, 16);
+            }
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '9px sans-serif';
+            ctx.font = 'bold 9px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(run[i], l0X + 5 + i * runCellW + runCellW/2, ry + 12);
+            ctx.fillText(run[i], l0X + 5 + i * runCellW + runCellW / 2, ry + 12);
           }
         }
       }
 
-      // 3. Level 1 Box
+      // 3. Level 1 Container (Disk Compacted)
       const l1X = memX;
-      const l1Y = 225;
+      const l1Y = 222;
       const l1W = memW;
-      const l1H = 30;
-      ctx.strokeStyle = colors.divider;
-      ctx.fillStyle = colors.divider + '11';
+      const l1H = 28;
+      ctx.strokeStyle = colors.containerBorder;
+      ctx.fillStyle = colors.containerBg;
       ctx.beginPath();
-      ctx.roundRect(l1X, l1Y, l1W, l1H, 6);
+      if (ctx.roundRect) {
+        ctx.roundRect(l1X, l1Y, l1W, l1H, 6);
+      } else {
+        ctx.rect(l1X, l1Y, l1W, l1H);
+      }
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = colors.text;
-      ctx.fillText('Level 1', l1X, l1Y - 8);
+      ctx.fillText('Level 1 (Merged Non-Overlapping Array)', l1X, l1Y - 7);
 
-      // Draw Level 1 entries
       if (level1.length > 0) {
         const l1CellW = l1W / level1.length;
         for (let i = 0; i < level1.length; i++) {
           const cx = l1X + i * l1CellW;
-          ctx.fillStyle = colors.theme;
+          ctx.fillStyle = '#0284c7';
           ctx.beginPath();
-          ctx.roundRect(cx + 2, l1Y + 3, l1CellW - 4, l1H - 6, 2);
+          if (ctx.roundRect) {
+            ctx.roundRect(cx + 2, l1Y + 2, l1CellW - 4, l1H - 4, 2);
+          } else {
+            ctx.rect(cx + 2, l1Y + 2, l1CellW - 4, l1H - 4);
+          }
           ctx.fill();
 
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 9px sans-serif';
+          ctx.font = 'bold 9px monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(level1[i], cx + l1CellW/2, l1Y + l1H/2 + 3);
+          ctx.fillText(level1[i], cx + l1CellW / 2, l1Y + l1H / 2 + 3);
         }
       }
 
-      // Update & Draw Particles
+      // Particles
       particles = particles.filter(p => {
         const active = p.update();
         p.draw(colors);
         return active;
       });
 
-      // Update & Draw Animations
+      // Animations
       animations = animations.filter(ani => {
         const active = ani.update();
         const currentY = ani.getCurrentY();
@@ -470,21 +814,27 @@
 
         for (let i = 0; i < ani.items.length; i++) {
           const cx = memX + i * runW;
-          ctx.fillStyle = colors.theme + 'cc';
+          ctx.fillStyle = colors.theme;
           ctx.beginPath();
-          ctx.roundRect(cx + 3, currentY + 3, runW - 6, 20, 3);
+          if (ctx.roundRect) {
+            ctx.roundRect(cx + 2, currentY + 2, runW - 4, 18, 3);
+          } else {
+            ctx.rect(cx + 2, currentY + 2, runW - 4, 18);
+          }
           ctx.fill();
 
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 9px sans-serif';
+          ctx.font = 'bold 9px monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(ani.items[i], cx + runW/2, currentY + 15);
+          ctx.fillText(ani.items[i], cx + runW / 2, currentY + 13);
         }
         return active;
       });
 
       requestAnimationFrame(draw);
     }
+
+    updateStats();
     requestAnimationFrame(draw);
   });
 </script>
