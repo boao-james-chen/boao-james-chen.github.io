@@ -2,91 +2,267 @@
  * Homepage / About page custom styles (inspired by shubhamkaushik.com)
  ******************************************************************************/
 
+// -----------------------------------------------------------------------------
+// Overall About Page Wrapper
+// -----------------------------------------------------------------------------
+.about-page {
+  padding-bottom: 2.5rem;
+}
+
+// -----------------------------------------------------------------------------
+// Hero Section
+// -----------------------------------------------------------------------------
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+}
+
+.hero-text {
+  min-width: 0;
+}
+
+.hero-name {
+  font-size: clamp(1.85rem, 1.45rem + 1.2vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: var(--global-text-color);
+  margin: 0 0 0.35rem 0;
+}
+
+.hero-role {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--global-text-color-light);
+  margin: 0 0 1.25rem 0;
+}
+
+.hero-bio.prose {
+  font-size: 0.975rem;
+  line-height: 1.7;
+  color: var(--global-text-color);
+
+  p {
+    margin: 0 0 0.85rem 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  a {
+    color: var(--global-theme-color);
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--global-theme-color), 0.35);
+    text-underline-offset: 2.5px;
+    transition: text-decoration-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      color: var(--global-hover-color);
+      text-decoration-color: currentColor;
+    }
+  }
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.35rem;
+  padding: 0 1.15rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--global-text-color);
+  color: var(--global-bg-color) !important;
+  border: 1px solid var(--global-text-color);
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+
+  span {
+    color: var(--global-bg-color) !important;
+    font-weight: 600;
+  }
+
+  .icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    stroke: var(--global-bg-color);
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: var(--global-theme-color);
+    border-color: var(--global-theme-color);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+
+    span {
+      color: #ffffff !important;
+    }
+
+    .icon {
+      stroke: #ffffff;
+    }
+  }
+}
+
+.hero-social {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    color: var(--global-text-color);
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+
+    i {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    &:hover {
+      color: var(--global-theme-color);
+      background: var(--global-divider-color);
+      border-color: var(--global-divider-color);
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.hero-photo-wrapper {
+  width: 12.5rem;
+  height: 12.5rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (max-width: 680px) {
+    order: -1;
+    width: 9rem;
+    height: 9rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.hero-photo.is-round {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 15%;
+  border: 2px solid var(--global-divider-color);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.14);
+  display: block;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.hero-photo-caption {
+  font-size: 0.75rem;
+  color: var(--global-text-color-light);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+// -----------------------------------------------------------------------------
+// Section Headers
+// -----------------------------------------------------------------------------
+.section {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
 .section-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
-  padding-bottom: .5rem;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--global-divider-color);
 
   h2 {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 600;
+    letter-spacing: -0.015em;
     margin: 0;
-    letter-spacing: -0.01em;
+    color: var(--global-text-color);
   }
 
   .section-link {
-    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 500;
     color: var(--global-text-color-light);
     text-decoration: none;
     white-space: nowrap;
+    transition: color 0.15s ease;
+
+    .icon {
+      width: 0.85rem;
+      height: 0.85rem;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
 
     &:hover {
       color: var(--global-theme-color);
       text-decoration: none;
+
+      .icon {
+        transform: translateX(3px);
+      }
     }
   }
 }
 
-.homepage-projects {
-  margin-bottom: 2rem;
-}
-
-.homepage-project-link {
-  text-decoration: none;
-  color: inherit;
-
-  &:hover {
-    text-decoration: none;
-    color: inherit;
-  }
-}
-
-.homepage-project-card {
-  border: 1px solid var(--global-divider-color);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: box-shadow .2s ease, transform .2s ease;
-
-  &:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .1);
-    transform: translateY(-2px);
-
-    .card-title {
-      color: var(--global-theme-color);
-    }
-  }
-
-  .card-img-top {
-    height: 120px;
-    object-fit: cover;
-    border-radius: 0;
-  }
-
-  .card-body {
-    padding: 1rem 1.15rem;
-  }
-
-  .card-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: .35rem;
-    transition: color .15s ease;
-  }
-
-  .card-text {
-    font-size: .82rem;
-    color: var(--global-text-color-light);
-    line-height: 1.5;
-    margin: 0;
-  }
-}
-
+// -----------------------------------------------------------------------------
+// News Section
+// -----------------------------------------------------------------------------
 .homepage-news {
-  margin-bottom: 2rem;
-
   .news-list {
     list-style: none;
     padding: 0;
@@ -94,24 +270,31 @@
   }
 
   .news-item {
-    display: flex;
-    gap: 1rem;
-    padding: .6rem 0;
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 1.25rem;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--global-divider-color);
-    font-size: .9rem;
-    line-height: 1.5;
+    font-size: 0.925rem;
+    line-height: 1.55;
+    align-items: baseline;
 
     &:last-child {
-      border-bottom: 0;
+      border-bottom: none;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
     }
   }
 
   .news-date {
-    flex-shrink: 0;
     color: var(--global-text-color-light);
-    font-size: .8rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    min-width: 90px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .news-content {
@@ -119,20 +302,281 @@
 
     a {
       color: var(--global-theme-color);
+      text-decoration: underline;
+      text-decoration-color: rgba(var(--global-theme-color), 0.35);
+      text-underline-offset: 2px;
+      transition: text-decoration-color 0.15s ease;
+
+      &:hover {
+        text-decoration-color: currentColor;
+      }
     }
   }
 }
 
+// -----------------------------------------------------------------------------
+// Publications Section
+// -----------------------------------------------------------------------------
 .homepage-publications {
-  margin-bottom: 2rem;
-
   .publications {
     margin-top: 0;
 
-    h2.bibliography:first-of-type {
-      border-top: none;
-      margin-top: 0;
-      padding-top: 0.5rem;
+    // Hide redundant year headers on the homepage
+    h2.bibliography {
+      display: none;
+    }
+
+    ol.bibliography {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      > li {
+        padding: 1.15rem 0;
+        margin: 0;
+        border-bottom: 1px solid var(--global-divider-color);
+
+        &:first-child {
+          padding-top: 0.25rem;
+        }
+      }
+
+      &:last-of-type > li:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 1.25rem;
+      margin: 0;
+
+      @media (max-width: 520px) {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+    }
+
+    .abbr {
+      padding: 0;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 0.22rem 0.55rem;
+        border-radius: 4px;
+        background: var(--global-theme-color);
+        color: #ffffff;
+        text-transform: uppercase;
+        width: auto !important;
+        margin-bottom: 0.45rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      figure {
+        margin: 0;
+        width: 100%;
+      }
+
+      .preview {
+        width: 100%;
+        aspect-ratio: 360 / 466;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid var(--global-divider-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+
+        &:hover {
+          border-color: var(--global-theme-color);
+          transform: translateY(-1px);
+        }
+      }
+    }
+
+    .col-sm-8,
+    .col-sm-10 {
+      padding: 0;
+      max-width: 100%;
+      flex: 1;
+    }
+
+    .title {
+      font-size: 0.985rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--global-text-color);
+      margin-bottom: 0.25rem;
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.15s ease;
+
+        &:hover {
+          color: var(--global-theme-color);
+          text-decoration: none;
+        }
+      }
+    }
+
+    .author {
+      font-size: 0.875rem;
+      color: var(--global-text-color-light);
+      line-height: 1.5;
+      margin-bottom: 0.2rem;
+
+      > em {
+        border-bottom: none !important;
+        font-style: normal;
+        font-weight: 600;
+        color: var(--global-text-color);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: none !important;
+
+        &:hover {
+          color: var(--global-theme-color);
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .periodical {
+      font-size: 0.835rem;
+      color: var(--global-text-color-light);
+      margin-bottom: 0.45rem;
+
+      em {
+        font-style: italic;
+      }
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.55rem;
+
+      .btn.btn-sm.z-depth-0 {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        height: 1.65rem;
+        padding: 0 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0;
+        border-radius: 4px;
+        border: 1px solid var(--global-divider-color);
+        background: var(--global-card-bg-color);
+        color: var(--global-text-color-light);
+        box-shadow: none !important;
+        margin: 0;
+        transition: all 0.15s ease;
+
+        &:hover {
+          border-color: var(--global-theme-color);
+          color: var(--global-theme-color);
+          background: rgba(var(--global-theme-color), 0.08);
+          text-decoration: none;
+        }
+      }
+    }
+
+    div.abstract.hidden,
+    div.bibtex.hidden {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    div.abstract.hidden.open {
+      display: block;
+      max-height: 100em;
+      margin-top: 0.75rem;
+      padding: 0.85rem 1.15rem;
+      border: none;
+      border-left: 3px solid var(--global-theme-color);
+      background: var(--global-code-bg-color);
+      border-radius: 0 4px 4px 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--global-text-color);
+      box-shadow: none;
+
+      p {
+        margin: 0;
+        line-height: 1.65;
+      }
+    }
+
+    div.bibtex.hidden.open {
+      display: block;
+      position: relative;
+      max-height: 100em;
+      margin-top: 0.75rem;
+      padding: 2.25rem 1.15rem 0.85rem 1.15rem;
+      border: none;
+      border-left: 3px solid var(--global-theme-color);
+      background: var(--global-code-bg-color);
+      border-radius: 0 4px 4px 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--global-text-color);
+      box-shadow: none;
+
+      pre {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: var(--global-text-color);
+      }
+    }
+
+    .pub-copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      height: 1.6rem;
+      padding: 0 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid var(--global-divider-color);
+      border-radius: 4px;
+      background: var(--global-card-bg-color);
+      color: var(--global-text-color-light);
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      .icon {
+        width: 0.8rem;
+        height: 0.8rem;
+      }
+
+      &:hover {
+        border-color: var(--global-theme-color);
+        color: var(--global-theme-color);
+        background: rgba(var(--global-theme-color), 0.08);
+      }
     }
   }
 }

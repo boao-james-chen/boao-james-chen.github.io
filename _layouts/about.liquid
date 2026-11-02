@@ -1,126 +1,163 @@
 ---
 layout: default
 ---
-<div class="post">
-  <header class="post-header">
-    <h1 class="post-title">
-      {% if site.title == 'blank' %}
-        <span class="font-weight-bold">{{ site.first_name }}</span> {{ site.middle_name }}
-        {{ site.last_name }}
-      {% else %}
-        {{ site.title }}
-      {% endif %}
-    </h1>
-    <p class="desc">{{ page.subtitle }}</p>
-  </header>
-
-  <article>
-    {% if page.profile %}
-      <div class="profile float-{% if page.profile.align == 'left' %}left{% else %}right{% endif %}">
-        {% if page.profile.image %}
-          {% assign profile_image_path = page.profile.image | prepend: 'assets/img/' %}
-          {% if page.profile.image_circular %}
-            {% assign profile_image_class = 'img-fluid z-depth-1 rounded-circle' %}
-          {% else %}
-            {% assign profile_image_class = 'img-fluid z-depth-1
-      rounded' %}
-          {% endif %}
-          {% capture sizes %}(min-width: {{site.max_width}}) {{ site.max_width | minus: 30 | times: 0.3}}px, (min-width: 576px)
-      30vw, 95vw"{% endcapture %}
-          {%
-            include figure.liquid loading="eager" path=profile_image_path class=profile_image_class sizes=sizes alt=page.profile.image
-            cache_bust=true
-          %}
+<div class="about-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-text">
+      <h1 class="hero-name">
+        {% if site.title != blank and site.title != 'blank' %}
+          {{ site.title }}
+        {% else %}
+          <span class="font-weight-bold">{{ site.first_name }}</span> {{ site.middle_name }} {{ site.last_name }}
         {% endif %}
+      </h1>
+      {% if page.subtitle %}
+        <p class="hero-role">{{ page.subtitle }}</p>
+      {% endif %}
+
+      <div class="hero-bio prose">
+        {{ content }}
+      </div>
+
+      <div class="hero-actions">
+        {% assign cv_url = page.cv_pdf | default: site.cv_pdf %}
+        {% unless cv_url contains '://' or cv_url == blank %}
+          {% assign cv_url = cv_url | prepend: '/assets/pdf/' | relative_url %}
+        {% endunless %}
+        {% if cv_url != blank %}
+          <a class="hero-btn-primary" href="{{ cv_url }}" target="_blank" rel="noopener noreferrer">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download CV</span>
+          </a>
+        {% endif %}
+
+        {% if page.social %}
+          <div class="hero-social">
+            {% if site.email %}
+              <a class="icon-button" href="mailto:{{ site.email | encode_email }}" aria-label="Email" title="Email">
+                <i class="fa-solid fa-envelope"></i>
+              </a>
+            {% endif %}
+            {% if site.scholar_userid %}
+              <a class="icon-button" href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" aria-label="Google Scholar" title="Google Scholar" target="_blank" rel="noopener noreferrer">
+                <i class="ai ai-google-scholar"></i>
+              </a>
+            {% endif %}
+            {% if site.github_username %}
+              <a class="icon-button" href="https://github.com/{{ site.github_username }}" aria-label="GitHub" title="GitHub" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-github"></i>
+              </a>
+            {% endif %}
+            {% if site.linkedin_username %}
+              <a class="icon-button" href="https://www.linkedin.com/in/{{ site.linkedin_username }}" aria-label="LinkedIn" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-linkedin"></i>
+              </a>
+            {% endif %}
+            {% if site.orcid_id %}
+              <a class="icon-button" href="https://orcid.org/{{ site.orcid_id }}" aria-label="ORCID" title="ORCID" target="_blank" rel="noopener noreferrer">
+                <i class="ai ai-orcid"></i>
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if page.profile and page.profile.image %}
+      <div class="hero-photo-wrapper">
+        <img
+          class="hero-photo is-round"
+          src="{{ page.profile.image | prepend: 'assets/img/' | relative_url }}"
+          alt="Portrait of {{ site.first_name }} {{ site.last_name }}"
+          loading="eager"
+        >
         {% if page.profile.more_info %}
-          <div class="more-info">{{ page.profile.more_info }}</div>
+          <div class="hero-photo-caption">{{ page.profile.more_info }}</div>
         {% endif %}
       </div>
     {% endif %}
+  </section>
 
-    <div>
-      {{ content }}
-      {% if page.social %}
-        <div class="social">
-          <div class="contact-icons">{% include social.liquid %}</div>
-          <div class="contact-note">{{ site.contact_note }}</div>
-        </div>
+  <!-- News Section -->
+  {% if page.news and site.announcements.enabled %}
+    <section class="section homepage-news" aria-labelledby="news-heading">
+      <div class="section-header">
+        <h2 id="news-heading">News</h2>
+        <a class="section-link" href="{{ '/news/' | relative_url }}">
+          <span>All news</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+      {% if site.news != blank %}
+        <ul class="news-list">
+          {% assign news = site.news | reverse %}
+          {% assign news_limit = site.announcements.limit | default: 5 %}
+          {% for item in news limit: news_limit %}
+            <li class="news-item">
+              <time class="news-date">{{ item.date | date: '%b %Y' }}</time>
+              <div class="news-content">
+                {% if item.inline %}
+                  {{ item.content | remove: '<p>' | remove: '</p>' | emojify }}
+                {% else %}
+                  <a class="news-title" href="{{ item.url | relative_url }}">{{ item.title }}</a>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-state">No news so far...</p>
       {% endif %}
-    </div>
-    <div class="clearfix"></div>
+    </section>
+  {% endif %}
 
-    <!-- News -->
-    {% if page.news and site.announcements.enabled %}
-      <section class="homepage-news">
-        <div class="section-header">
-          <h2><a href="{{ '/news/' | relative_url }}" style="color: inherit">news</a></h2>
-          <a href="{{ '/news/' | relative_url }}" class="section-link">All news →</a>
-        </div>
-        {% if site.news != blank %}
-          {% assign news_size = site.news | size %}
-          <div
-            class="table-responsive"
-            {% if site.announcements.scrollable and news_size > 3 %}
-              style="max-height: 60vw"
-            {% endif %}
-          >
-            <ul class="news-list">
-              {% assign news = site.news | reverse %}
-              {% if site.announcements.limit %}
-                {% assign news_limit = site.announcements.limit %}
-              {% else %}
-                {% assign news_limit = news_size %}
-              {% endif %}
-              {% for item in news limit: news_limit %}
-                <li class="news-item">
-                  <span class="news-date">{{ item.date | date: '%b %Y' }}</span>
-                  <span class="news-content">
-                    {% if item.inline %}
-                      {{ item.content | remove: '<p>' | remove: '</p>' | emojify }}
-                    {% else %}
-                      <a class="news-title" href="{{ item.url | relative_url }}">{{ item.title }}</a>
-                    {% endif %}
-                  </span>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
-          <p>No news so far...</p>
-        {% endif %}
-      </section>
-    {% endif %}
-
-    <!-- Publications -->
-    {% if page.publications %}
-      <section class="homepage-publications">
-        <div class="section-header">
-          <h2><a href="{{ '/Project/' | relative_url }}" style="color: inherit">publications</a></h2>
-          <a href="{{ '/Project/' | relative_url }}" class="section-link">All publications →</a>
-        </div>
-        <div class="publications">
-          {% bibliography %}
-        </div>
-      </section>
-    {% endif %}
-
-    <!-- Selected papers -->
-    {% if page.selected_papers %}
-      <section class="homepage-publications">
-        <div class="section-header">
-          <h2><a href="{{ '/Project/' | relative_url }}" style="color: inherit">selected publications</a></h2>
-          <a href="{{ '/Project/' | relative_url }}" class="section-link">All publications →</a>
-        </div>
+  <!-- Publications Section -->
+  {% if page.selected_papers %}
+    <section class="section homepage-publications" aria-labelledby="publications-heading">
+      <div class="section-header">
+        <h2 id="publications-heading">Selected Publications</h2>
+        <a class="section-link" href="{{ '/Project/' | relative_url }}">
+          <span>All publications</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+      <div class="publications">
         {% include selected_papers.liquid %}
-      </section>
-    {% endif %}
+      </div>
+    </section>
+  {% elsif page.publications %}
+    <section class="section homepage-publications" aria-labelledby="publications-heading">
+      <div class="section-header">
+        <h2 id="publications-heading">Publications</h2>
+        <a class="section-link" href="{{ '/Project/' | relative_url }}">
+          <span>All publications</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+      <div class="publications">
+        {% bibliography %}
+      </div>
+    </section>
+  {% endif %}
 
-    <!-- LSM Visualizer -->
-    {% if page.lsm_visualizer %}
-      <section class="homepage-lsm-visualizer">
-        {% include lsm_visualizer.liquid %}
-      </section>
-    {% endif %}
-
-  </article>
+  <!-- LSM Visualizer (if enabled) -->
+  {% if page.lsm_visualizer %}
+    <section class="section homepage-lsm-visualizer">
+      {% include lsm_visualizer.liquid %}
+    </section>
+  {% endif %}
 </div>

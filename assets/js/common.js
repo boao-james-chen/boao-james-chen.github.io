@@ -15,6 +15,22 @@ $(document).ready(function () {
     $(this).parent().parent().find(".award.hidden.open").toggleClass("open");
     $(this).parent().parent().find(".bibtex.hidden").toggleClass("open");
   });
+
+  // copy bibtex button functionality
+  $(document).on("click", ".pub-copy-btn", function () {
+    var $btn = $(this);
+    var bibtexText = $btn.siblings("figure").find("code").text() || $btn.siblings("pre").text();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(bibtexText.trim()).then(function () {
+        var $span = $btn.find("span");
+        var original = $span.text();
+        $span.text("Copied!");
+        setTimeout(function () {
+          $span.text(original);
+        }, 2000);
+      });
+    }
+  });
   $("a").removeClass("waves-effect waves-light");
 
   // bootstrap-toc
