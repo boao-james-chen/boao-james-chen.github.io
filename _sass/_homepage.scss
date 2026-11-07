@@ -760,6 +760,13 @@
       em {
         font-style: italic;
       }
+
+      &.pub-note {
+        font-size: 0.785rem;
+        font-style: italic;
+        margin-top: -0.25rem;
+        color: var(--global-text-color-light);
+      }
     }
 
     .links {

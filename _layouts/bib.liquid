@@ -120,20 +120,30 @@
           {% if forloop.first == false %},&nbsp;{% endif %}
           {%- if forloop.last and author_array_limit == author_array_size %}and&nbsp;{% endif -%}
         {% endif %}
+        {%- assign author_has_star = false -%}
+        {%- if author.last contains '*' -%}
+          {%- assign author_has_star = true -%}
+          {%- assign display_last_name = author.last | remove: '*' -%}
+        {%- else -%}
+          {%- assign display_last_name = author.last -%}
+        {%- endif -%}
         {%- if author_is_self -%}
           <em>
             {{- author.first }}
-            {{ author.last -}}
+            {{ display_last_name -}}
           </em>
+          {%- if author_has_star -%}<sup>*</sup>{%- endif -%}
         {%- else -%}
           {%- if coauthor_url -%}
             <a href="{{coauthor_url}}">
               {{- author.first }}
-              {{ author.last -}}
+              {{ display_last_name -}}
             </a>
+            {%- if author_has_star -%}<sup>*</sup>{%- endif -%}
           {%- else -%}
             {{- author.first }}
-            {{ author.last -}}
+            {{ display_last_name -}}
+            {%- if author_has_star -%}<sup>*</sup>{%- endif -%}
           {% endif %}
         {%- endif -%}
       {% endfor %}
@@ -177,9 +187,9 @@
     {% assign proceedings = 'inproceedings,incollection' | split: ',' %}
     {% assign thesis = 'thesis,mastersthesis,phdthesis' | split: ',' %}
     {% if entry.type == 'article' %}
-      {% capture entrytype %}<em>{{entry.journal}}</em>{% endcapture %}
+      {% capture entrytype %}<em>{{entry.journal | default: entry.conference}}</em>{% endcapture %}
     {% elsif proceedings contains entry.type %}
-      {% capture entrytype %}<em>In {{entry.booktitle}}</em> {% endcapture %}
+      {% capture entrytype %}<em>In {{entry.booktitle | default: entry.conference}}</em> {% endcapture %}
     {% elsif thesis contains entry.type %}
       {% capture entrytype %}<em>{{entry.school}}</em> {% endcapture %}
     {% else %}
@@ -203,12 +213,16 @@
     {% endif %}
     {% assign entrytype_text = entrytype | strip_html | strip %}
     {% capture periodical %}{{ entrytype }}{% if entrytype_text != "" and entryyear != "" %}, {% endif %}{{ entrymonth }}{{ entryyear }}{% endcapture %}
-    <div class="periodical">
-      {{ periodical | strip }}
-    </div>
-    <div class="periodical">
-      {{ entry.note | strip }}
-    </div>
+    {% if periodical != "" and periodical != " " %}
+      <div class="periodical">
+        {{ periodical | strip }}
+      </div>
+    {% endif %}
+    {% if entry.note and entry.note != "" %}
+      <div class="periodical pub-note">
+        {{ entry.note | strip }}
+      </div>
+    {% endif %}
 
     <!-- Links/Buttons -->
     <div class="links">
