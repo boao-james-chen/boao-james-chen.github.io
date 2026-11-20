@@ -73,7 +73,9 @@
     {% include scripts/imageLayouts.liquid %}
     {% include scripts/jekyll_tabs.liquid %}
     {% include scripts/back_to_top.liquid %}
-    {% include scripts/search.liquid %}
-    <script src="{{ '/assets/js/shortcut-key.js' | relative_url }}"></script>
+    {% if site.search_enabled %}
+      {% include scripts/search.liquid %}
+      <script src="{{ '/assets/js/shortcut-key.js' | relative_url }}"></script>
+    {% endif %}
   </body>
 </html>
